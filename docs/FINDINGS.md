@@ -91,3 +91,11 @@ Things that made a correct run look like a failure:
 - **Reading `E3` as your third `--element`.** Candidate ids follow sorted element ids, not your argument order. Confirm the choice by the screen you land on.
 
 `jev-ios` reads accessibility through serve-sim's own endpoint. That is a different path from Claude Code's native simulator `inspect`, which in the other session failed persistently on one app. `jev-ios` might work where `inspect` didn't; we haven't tested that app.
+
+## 10. Don't make Claude imitate Jev — use the built-in Concise style
+
+We wanted replies with no think-aloud: a verdict and nothing else, like Jev. The popular terse-output projects report modest effects on output tokens (caveman's skill alone: −8.5% across 86 tasks; claude-token-efficient: −4 to −12%). Claude Code's built-in `Concise` output style already skips preamble and narration. So we tested whether a Jev-shaped custom style could beat it.
+
+It couldn't. Across three code questions on Sonnet, `Concise` cut output tokens 18% against the default style with every answer correct. Our first style, which asked for `verdict · confidence · evidence`, stopped investigating early. It gave one wrong answer, attaching a confidence of 0.85 to a conclusion it admitted it hadn't checked. The second version fixed accuracy and lost the saving (+4%).
+
+A confidence number from Jev is a calibrated probability. One Claude writes because a format asks for it is decoration, and it makes wrong answers look certain. Get calibrated judgments from Jev. Get shorter replies from `Concise`. Full method and numbers in [`experiments/output-style-ab`](../experiments/output-style-ab).

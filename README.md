@@ -55,6 +55,16 @@ Read `templates/CLAUDE.md` and take what fits — don't copy it wholesale; it na
 
 If you run multi-agent workflows on an expensive parent model, check your agent definitions for `model: inherit`. Every subagent then runs on the parent's model. We found all five of ours set that way, which is what made a Fable 5.1 multi-agent run so costly. Setting explicit tiers fixed it without any proxy. `subagent_type: "fork"` ignores `model` entirely and always uses the parent.
 
+## Want shorter replies? Use the built-in Concise style
+
+We tried to make Claude answer "like Jev", as a verdict with a confidence number and no narration. It backfired. Claude stopped investigating early and attached a confidence of 0.85 to a wrong answer it hadn't checked. Claude Code's built-in `Concise` output style did better: 18% fewer output tokens than the default style, every answer correct.
+
+```sh
+/output-style concise
+```
+
+For a calibrated confidence, call Jev; don't ask Claude to write one. Method and numbers: [experiments/output-style-ab](experiments/output-style-ab).
+
 ## Related projects
 
 See [THIRD_PARTY.md](THIRD_PARTY.md). In short: [fast-jev-compaction](https://github.com/tamaratran/fast-jev-compaction), [jev-router](https://github.com/gargpratyush/jev-router) and [jevprune](https://github.com/ibrahemid/jevprune) are separate projects we use alongside these skills. They are not bundled.
