@@ -1,0 +1,17 @@
+node_modules/
+.env
+.env.*
+!.env.example
+*.log
+*.jsonl
+*.bak
+*.bak-*
+.DS_Store
+context-data/
+context-data-claude/
+session-data/
+metrics-data/
+reports/
+settings.json
+settings.local.json
+.claude.json
