@@ -10,3 +10,4 @@ description: Batch 5+ fixed-label judgments without loading record text into age
 호출당 레코드 하나와 명확한 choice를 사용하며 가중치·임계값은 코드가 소유한다. 낮은 confidence와 UNKNOWN을 숨기지 않는다.
 배치가 필요할 때만 [요청 형식·실행·계측](references/batch.md)을 읽는다. text_tokens는 입력 추정량이며 에이전트 컨텍스트 유입 실측이 아니다.
 공유 CLI는 이미 설치되어 있다. 연결 미확인·설정 변경 때만 jev-mode check를 실행하고 실패하면 멈춘다; 재설치하거나 공유 파일을 수정하지 않는다.
+서브에이전트에 Jev를 쓰게 할 때는 산문 지시가 아니라 [required 출력 필드](references/delegation.md)로 강제한다.

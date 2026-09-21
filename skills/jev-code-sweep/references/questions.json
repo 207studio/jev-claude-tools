@@ -1,0 +1,31 @@
+{
+ "risk": {
+  "type": "choice",
+  "instructions": "This is a numbered slice of source code from an iPad teaching whiteboard app. Does the code shown contain a likely runtime defect? Judge only the code shown. Ignore style, naming and comments.",
+  "criteria": {
+   "defect": "a specific line can crash, lose or corrupt user data, race between threads, leak, or produce a wrong result under realistic input",
+   "fragile": "no definite defect, but it depends on an unchecked assumption: force unwrap, unchecked index, swallowed error, unsynchronized shared state, missing cleanup",
+   "sound": "inputs and errors are handled; nothing here is likely to misbehave"
+  }
+ },
+ "kind": {
+  "type": "choice",
+  "instructions": "If this code were to fail at runtime, which failure is most likely? Pick by the riskiest line shown.",
+  "criteria": {
+   "crash": "force unwrap, out-of-range index, division by zero, unexpected nil, fatalError",
+   "data_loss": "file write, save, delete, move, migration or sync that can drop or overwrite user content",
+   "concurrency": "shared mutable state touched from more than one thread, actor or queue; main-thread violations",
+   "lifecycle": "observer, timer, task, web view or resource not released or torn down; retain cycle",
+   "logic": "wrong condition, off-by-one, stale state, wrong unit or coordinate, unhandled case",
+   "none": "no realistic failure"
+  }
+ },
+ "pinpoint": {
+  "type": "choice",
+  "instructions": "Is there one specific numbered line in this code that misbehaves under a realistic input or timing? Answer yes only if you could name the line and the triggering condition.",
+  "criteria": {
+   "yes": "a nameable line fails for a nameable realistic condition: nil value, empty collection, missing file, failed write, re-entrant call, background thread, rotated or zero-size view",
+   "no": "no single line can be named, or the failure needs an unrealistic condition"
+  }
+ }
+}

@@ -64,3 +64,30 @@ Our weekly sweep task stopped for 24 hours at the first shell command that neede
 ## 7. Subagents don't see host hooks
 
 This one is not ours. The jev-mode author observed on Codex that subagent sessions received no pre-action hooks at all: 339 sessions, 29,146 tool calls, zero hook invocations. We haven't measured it on Claude Code and don't assume it transfers. It's still a reason to give subagents narrow work and check their results afterwards, instead of trusting a hook to have covered them.
+
+## 8. Subagents follow required output fields, not prose
+
+Another session of ours ran the same defect-fix workflow three times on an iPad app repository. The first two told subagents in prose to use Jev first; measured Jev calls were 0–1. The third added one **required** field to the subagent's structured-output schema, holding the verbatim output of a `jevq.py claim` call. All 36 items came back with it filled — no blanks, no `ERROR`.
+
+Three runs in one session, so treat it as a reproduced observation, not a law. The rule we took from it: don't ask a subagent to use a tool; require a field only that tool's output can fill, and have the parent check its format in code. A self-reported "checked with Jev: true" doesn't count — it can be filled without calling anything. Example schema and parent-side check in [`skills/jev-mode/references/delegation.md`](../skills/jev-mode/references/delegation.md).
+
+That same session reused one repository-sweep recipe three times: 813 chunks → 282 after the first Jev pass → 117 after the second → 17 clusters assigned to reviewers. Reviewers read about 14% of the chunks. That is chunks not read, not a measured token saving. The recipe, both question sets and the exact scoring formula are in [`skills/jev-code-sweep`](../skills/jev-code-sweep).
+
+Its two helper scripts had been rewritten from scratch three times that day. The cause was one hard-coded worktree path; they now find the repository root from git.
+
+## 9. `jev-ios` runs on Claude Code once serve-sim is started
+
+`jev-ios` needs a running, registered serve-sim 0.1.46. On Codex a plugin starts it; Claude Code had nothing that did, so we first recorded `jev-ios` as unusable there. serve-sim is just an npm package, though, and `scripts/serve-sim.sh` starts it.
+
+Verified on a throwaway iPhone 15 / iOS 27.0 simulator, deleted afterwards: Jev chose the right Settings row out of four at 0.96, the tap navigated, and the run ended `status: done`.
+
+The first live run found a bug our guard-path tests had missed. The launcher read serve-sim's boolean `running` flag as if it were a list, and reported "not registered" while the server was up. Test the success path, not only the refusals.
+
+Things that made a correct run look like a failure:
+
+- **Calling it right after the app launches.** The accessibility tree was still empty, so it stopped with `steps: 0`. It observes once; it doesn't wait for the UI.
+- **Labels in the wrong language.** A simulator created on a Korean Mac has Korean labels; English `--element` values matched nothing. Some labels contain a non-breaking space (`\xa0`). Copy labels from the `/ax` output.
+- **No `--done-label`.** A successful tap still reported `stopped` / `observation_or_provider_failed`, because the new screen had none of the allowed elements. Pass a done label that exists **only** on the destination screen; one that's also on the starting screen can end the run before it taps.
+- **Reading `E3` as your third `--element`.** Candidate ids follow sorted element ids, not your argument order. Confirm the choice by the screen you land on.
+
+`jev-ios` reads accessibility through serve-sim's own endpoint. That is a different path from Claude Code's native simulator `inspect`, which in the other session failed persistently on one app. `jev-ios` might work where `inspect` didn't; we haven't tested that app.

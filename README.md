@@ -15,9 +15,13 @@ Independent community project. Not an official Anthropic or TypeSafe product. Je
 | `skills/jev-mode` | Batch 5+ fixed-label judgments without loading record text into context | Needs [ddfeyes/jev-mode](https://github.com/ddfeyes/jev-mode) CLI. Not for prose, code, arithmetic, counting, or date comparison |
 | `skills/jev-code-search` | Broad relevance search where ripgrep candidates are filtered by Jev **before** they enter context | Needs the `jev_context` MCP server from jev-codex-tools |
 | `skills/jev-verify` | Decide whether an optional repeated verification is worth running | Never skips a required check; a SKIP means "not run", not "passed" |
-| `skills/jev-action-control` | Delegate explicitly allowed repeated browser / macOS / iOS actions to bounded Jev choices | Stops on low confidence, stale state, or permission denial |
+| `skills/jev-action-control` | Delegate explicitly allowed repeated browser / macOS / iOS actions to bounded Jev choices. On iOS, runs `jev-ios` through `scripts/serve-sim.sh` | Stops on low confidence, stale state, or permission denial |
+| `skills/jev-code-sweep` | Sweep a whole repository for likely defects: Jev triages every ~100-line chunk before any agent reads code, and only the top clusters go to reviewers | Triage only. Fixes come from reviewers who read the actual code |
 | `config/agent-tier.json` | A Jev `choice` question that picks haiku / sonnet / opus for a subagent role | You own the policy; Jev only supplies the judgment |
 | `templates/CLAUDE.md` | The user-scope policy we run, as a worked example to adapt | Paths generalized to `~` |
+| `scripts/jevq.py` | Ask Jev a yes/no about a line range, or check a reviewer's claim against the code around a line. Prints one line; never prints code | Refuses ranges over 220 lines. Low confidence becomes `UNSURE` |
+| `scripts/chunk.py` | Split git-tracked source into ~100-line JSONL records for `jev-mode batch` | Prints counts only |
+| `scripts/serve-sim.sh` | Start, locate and stop the [serve-sim](https://github.com/EvanBacon/serve-sim) helper that `jev-ios` needs | Binds 127.0.0.1 only; won't touch a simulator another task already serves; won't stop without a UDID |
 | `scripts/weekly-sweep.sh` | One-command health check + GitHub sweep for an unattended weekly task | Read-only. Installs nothing |
 | `scripts/register-jev-context-mcp.sh` | Registers the `jev_context` MCP server at user scope | Keeps its metrics directory separate from Codex's |
 
@@ -35,8 +39,13 @@ The skills use **progressive disclosure**: a short `SKILL.md` (~700–900 bytes)
 ```sh
 git clone https://github.com/207studio/jev-claude-tools
 cp -R jev-claude-tools/skills/* ~/.claude/skills/
-mkdir -p ~/.claude/jev && cp jev-claude-tools/config/agent-tier.json ~/.claude/jev/
+mkdir -p ~/.claude/jev
+cp jev-claude-tools/config/agent-tier.json jev-claude-tools/scripts/{jevq.py,chunk.py,serve-sim.sh} ~/.claude/jev/
 ```
+
+The skills call these by their `~/.claude/jev/` paths.
+
+For iOS: `jev-ios` (from jev-codex-tools) accepts only serve-sim **0.1.46**. `serve-sim.sh` looks for it in the npx cache path jev-ios expects; if yours is elsewhere, set `JEV_SERVE_SIM` to its `dist/serve-sim.js`. Run `npx --yes serve-sim@0.1.46 --version` once to populate the cache.
 
 Read `templates/CLAUDE.md` and take what fits — don't copy it wholesale; it names our own paths and projects.
 

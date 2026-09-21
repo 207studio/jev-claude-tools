@@ -18,7 +18,8 @@ for b in jev-claude jev-explain jev-mode jev-judge jevprune jev-codex; do
 done
 printf 'fast-jev-compaction: %s (0이면 사라짐)\n' "$(grep -c 'fast-jev-compaction' "$HOME/.claude/settings.json" 2>/dev/null || echo 0)"
 printf "jev_context MCP: %s\n" "$(claude mcp get jev_context 2>/dev/null | grep -m1 Status || echo MISSING)"
-printf 'user skills: %s (기준 19)\n' "$(ls "$HOME/.claude/skills/" 2>/dev/null | wc -l | tr -d ' ')"
+printf "serve-sim 0.1.46 (jev-ios 필수): %s\n" "$(/usr/local/bin/node $HOME/.npm/_npx/952f9bf55a4c6785/node_modules/serve-sim/dist/serve-sim.js --version 2>/dev/null || echo MISSING — npm 캐시가 비워졌을 수 있음)"
+printf 'user skills: %s (기준 20)\n' "$(ls "$HOME/.claude/skills/" 2>/dev/null | wc -l | tr -d ' ')"
 printf 'agent model tiers:\n'
 for f in "$HOME"/.claude/agents/*.md; do
   printf '  %-20s %s\n' "$(basename "$f" .md)" "$(grep -m1 '^model:' "$f" 2>/dev/null || echo '(없음)')"

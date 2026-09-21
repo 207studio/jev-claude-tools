@@ -1,0 +1,19 @@
+{
+  "guard": {
+    "type": "choice",
+    "instructions": "Find the single riskiest operation in this numbered code slice (force unwrap, array subscript, file write or delete, cross-thread state access, unowned capture, arithmetic on a possibly zero or empty value). Is that operation protected in the lines shown?",
+    "criteria": {
+      "unguarded": "nothing in the lines shown checks the condition before the risky operation runs; a nil, empty, missing, failed or concurrent case reaches it",
+      "guarded": "a guard, if-let, bounds or isEmpty check, do-catch, lock, main-actor hop or default value covers the risky operation",
+      "benign": "there is no risky operation in these lines"
+    }
+  },
+  "ships": {
+    "type": "choice",
+    "instructions": "Does this code run for end users of the shipped app, or is it developer-only?",
+    "criteria": {
+      "user_facing": "app feature code that runs on a teacher's iPad during normal use",
+      "dev_only": "probe, verification harness, test helper, audit or build script, debug-only path"
+    }
+  }
+}

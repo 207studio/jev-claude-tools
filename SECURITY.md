@@ -8,6 +8,10 @@ Skills are instructions your agent will follow. Read a skill before installing i
 
 `jev-verify` may choose whether or which **supplied** verification to run. It must not generate executable commands, and a SKIP is "not run", never "passed". `jev-action-control` executes only actions you already allowed, rechecks state before acting, and stops on low confidence or permission denial.
 
+`scripts/serve-sim.sh` starts serve-sim bound to `127.0.0.1` and only in `--detach` (helper) mode. serve-sim's own help warns that its preview server exposes a token-gated shell-exec route, so never bind it to `0.0.0.0` or put it on a shared network. The script refuses to start on a simulator another task already serves, and refuses to stop without a UDID, because a bare `--kill` stops every simulator mirror on the machine. It never boots a simulator.
+
+`scripts/jevq.py` and `scripts/chunk.py` send numbered code slices to TypeSafe. They print only verdicts and counts, never code — but the code still leaves your machine.
+
 `scripts/weekly-sweep.sh` is read-only: it measures, checks and searches, and installs or modifies nothing. Nothing here registers hooks or changes Claude Code permissions on its own.
 
 This is an experimental extraction from one person's setup and has not been security-audited.
