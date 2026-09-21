@@ -20,7 +20,9 @@ Independent community project. Not an official Anthropic or TypeSafe product. Je
 | `config/agent-tier.json` | A Jev `choice` question that picks haiku / sonnet / opus for a subagent role | You own the policy; Jev only supplies the judgment |
 | `templates/CLAUDE.md` | The user-scope policy we run, as a worked example to adapt | Paths generalized to `~` |
 | `scripts/jevq.py` | Ask Jev a yes/no about a line range, or check a reviewer's claim against the code around a line. Prints one line; never prints code | Refuses ranges over 220 lines. Low confidence becomes `UNSURE` |
-| `scripts/chunk.py` | Split git-tracked source into ~100-line JSONL records for `jev-mode batch` | Prints counts only |
+| `scripts/chunk.py` | Split git-tracked source into ~100-line JSONL records for `jev-mode batch` | Prints counts only. Refuses to write inside the repository |
+| `scripts/locate.py` | Find where something happens: chunk → keyword filter → Jev → top `file:line` ranges. Run it from the parent session instead of delegating the search | Prints ranges and scores only, never code |
+| `agents/jev-scout.md` + `scripts/scout-gate.py` | A locating subagent that must call Jev before it can read code — enforced by a PreToolUse hook in its own definition | Not a security boundary; makes "Jev first" the default path |
 | `scripts/serve-sim.sh` | Start, locate and stop the [serve-sim](https://github.com/EvanBacon/serve-sim) helper that `jev-ios` needs | Binds 127.0.0.1 only; won't touch a simulator another task already serves; won't stop without a UDID |
 | `scripts/weekly-sweep.sh` | One-command health check + GitHub sweep for an unattended weekly task | Read-only. Installs nothing |
 | `scripts/register-jev-context-mcp.sh` | Registers the `jev_context` MCP server at user scope | Keeps its metrics directory separate from Codex's |
@@ -40,7 +42,8 @@ The skills use **progressive disclosure**: a short `SKILL.md` (~700–900 bytes)
 git clone https://github.com/207studio/jev-claude-tools
 cp -R jev-claude-tools/skills/* ~/.claude/skills/
 mkdir -p ~/.claude/jev
-cp jev-claude-tools/config/agent-tier.json jev-claude-tools/scripts/{jevq.py,chunk.py,serve-sim.sh} ~/.claude/jev/
+cp jev-claude-tools/config/agent-tier.json jev-claude-tools/scripts/{jevq.py,chunk.py,locate.py,scout-gate.py,serve-sim.sh} ~/.claude/jev/
+cp jev-claude-tools/agents/jev-scout.md ~/.claude/agents/
 ```
 
 The skills call these by their `~/.claude/jev/` paths.

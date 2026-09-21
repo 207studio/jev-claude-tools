@@ -65,6 +65,7 @@ final = b["score"] * (0.4 + 0.6 * pu) * (0.5 + 0.5 * pship)
 
 - 상위 청크를 파일·모듈 단위로 묶어(cluster) 검수 에이전트 하나당 한 묶음을 준다
 - 에이전트에게는 청크 id(`path:START-END`)와 `kind` 판정만 준다. 본문은 에이전트가 직접 읽는다
+- **위치 찾기만 필요하면 에이전트를 띄우지 않는다** — `~/.claude/jev/locate.py`를 부모가 직접 부른다(측정: 7.3초 대 Explore 위임 6분 21초·Jev 0회). 꼭 위임하면 내장 Explore 말고 `jev-scout`([위임 규칙](../../jev-mode/references/delegation.md))
 - 에이전트 티어: `jev-mode ask --state-file <역할설명> --questions-file ~/.claude/jev/agent-tier.json`.
   원 세션의 2차 티어 질문은 "가드 유무를 한두 파일 안에서 판정" = sonnet, "여러 파일의 상태·타이밍을 조합해 어디에도 적혀 있지 않은 실패 순서를 구성" = opus 였다
 

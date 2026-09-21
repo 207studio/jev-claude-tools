@@ -99,3 +99,24 @@ We wanted replies with no think-aloud: a verdict and nothing else, like Jev. The
 It couldn't. Across three code questions on Sonnet, `Concise` cut output tokens 18% against the default style with every answer correct. Our first style, which asked for `verdict · confidence · evidence`, stopped investigating early. It gave one wrong answer, attaching a confidence of 0.85 to a conclusion it admitted it hadn't checked. The second version fixed accuracy and lost the saving (+4%).
 
 A confidence number from Jev is a calibrated probability. One Claude writes because a format asks for it is decoration, and it makes wrong answers look certain. Get calibrated judgments from Jev. Get shorter replies from `Concise`. Full method and numbers in [`experiments/output-style-ab`](../experiments/output-style-ab).
+
+## 11. Enforcing Jev in `Agent`-tool subagents: frontmatter hooks work, prose and SubagentStop don't
+
+Section 8 covered workflow agents, where a required output field forces the Jev call. Subagents launched with the `Agent` tool have no output schema, so we were back to prose — and prose failed again. The other session sent an Explore agent (Sonnet) to find the cause of a bug with the instruction "ask jevq before you Read". It made **0** Jev calls, took 6 min 21 s and 113k tokens. The same search, run by the parent as chunk → keyword filter → `jev-mode batch`, took **7.3 s**.
+
+Two things we checked in the docs:
+
+- Built-in **Explore and Plan skip CLAUDE.md**. They never see your Jev routing rules. Custom agents load them.
+- **`SubagentStop` ignores exit 2.** The subagent has already finished, so "block the stop and send it back if it never called Jev" can't be built.
+
+What does work is a **PreToolUse hook declared in a custom agent's own frontmatter**. `agents/jev-scout.md` gates Read and `cat`/`head`/`sed` behind a first Jev call (`scripts/scout-gate.py`). Tested with real subagents:
+
+- The hook ran inside the subagent under the subagent's own `agent_id`.
+- A probe agent with no Jev instructions had its first Read denied, followed the denial message to call `locate.py`, then read.
+- `jev-scout` itself called Jev first unprompted in both runs, even when told to "Read the file right now".
+
+This corrects something we'd written in our own `CLAUDE.md`: "subagents don't receive pre-action hooks." That came from the jev-mode author's observation on **Codex**. On Claude Code it doesn't hold for hooks in a custom agent's frontmatter. We haven't tested whether global `settings.json` hooks reach built-in agents.
+
+The rule we now follow: **don't delegate locating code.** Run `scripts/locate.py` from the parent — it found both correct locations in jev-mode as its top two results in under a second. If you must delegate, use `jev-scout`, not Explore.
+
+Also fixed: `chunk.py --help` had been treated as an output path and wrote a 6.5 MB file named `--help` into a repository root. It now uses argparse and refuses to write inside the repository.
